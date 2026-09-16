@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>سما</title>
+<meta name="description" content="رحلة صغيرة، معمولة لشخص واحد.">
+<meta name="theme-color" content="#0a1322">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@200;300;400;500&family=Aref+Ruqaa:wght@400;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body class="is-locked" data-atm="dawn" data-chapter="0">
+
+<!-- ============ SVG sprite ============ -->
+<svg class="sprite" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="ic-lily" viewBox="0 0 100 100">
+    <g fill="currentColor">
+      <path d="M50 56 C42 40 42 20 50 2 C58 20 58 40 50 56Z"/>
+      <path d="M50 56 C42 40 42 20 50 2 C58 20 58 40 50 56Z" transform="rotate(60 50 56)"/>
+      <path d="M50 56 C42 40 42 20 50 2 C58 20 58 40 50 56Z" transform="rotate(120 50 56)"/>
+      <path d="M50 56 C42 40 42 20 50 2 C58 20 58 40 50 56Z" transform="rotate(180 50 56)"/>
+      <path d="M50 56 C42 40 42 20 50 2 C58 20 58 40 50 56Z" transform="rotate(240 50 56)"/>
+      <path d="M50 56 C42 40 42 20 50 2 C58 20 58 40 50 56Z" transform="rotate(300 50 56)"/>
+    </g>
+    <circle cx="50" cy="56" r="3.5"/>
+  </symbol>
+  <symbol id="ic-play" viewBox="0 0 24 24"><path d="M7.5 4.2v15.6L20 12 7.5 4.2Z"/></symbol>
+  <symbol id="ic-pause" viewBox="0 0 24 24"><path d="M6.8 5h3.8v14H6.8zM13.4 5h3.8v14h-3.8z"/></symbol>
+  <symbol id="ic-star" viewBox="0 0 24 24"><path d="M12 1.5l2.6 8 8 2.5-8 2.5L12 22.5 9.4 14.5l-8-2.5 8-2.5L12 1.5Z"/></symbol>
+</svg>
+
+
+<!-- ============ Atmosphere (fixed, always behind) ============ -->
+<div class="atmo" aria-hidden="true">
+  <div class="atmo__layer atmo__layer--dawn"></div>
+  <div class="atmo__layer atmo__layer--day"></div>
+  <div class="atmo__layer atmo__layer--cream"></div>
+  <div class="atmo__layer atmo__layer--sunset"></div>
+  <div class="atmo__layer atmo__layer--twilight"></div>
+  <div class="atmo__layer atmo__layer--night"></div>
+  <div class="atmo__layer atmo__layer--final"></div>
+  <div class="atmo__grain"></div>
+  <div class="atmo__vignette"></div>
+</div>
+
+<div class="cursor-light" id="cursorLight" aria-hidden="true"></div>
+<div class="dust" id="dust" aria-hidden="true"></div>
+
+
+<!-- ============ Chapter rail (vertical, desktop only) ============ -->
+<nav class="rail" id="rail" aria-label="فصول">
+  <span class="rail__line"></span>
+  <span class="rail__fill" id="railFill"></span>
+  <ul class="rail__dots" id="railDots"></ul>
+</nav>
+
+
+<!-- ============ Progress + Music ============ -->
+<div class="topline" aria-hidden="true"><span id="topFill"></span></div>
+
+<button class="sound" id="soundBtn" type="button" aria-label="تشغيل" aria-pressed="false">
+  <span class="sound__halo"></span>
+  <svg class="sound__ic sound__ic--play"  aria-hidden="true"><use href="#ic-play"/></svg>
+  <svg class="sound__ic sound__ic--pause" aria-hidden="true"><use href="#ic-pause"/></svg>
+</button>
+
+<audio id="audio" loop preload="none"></audio>
+
+
+<!-- ============ Egg tracker (subtle, bottom-left) ============ -->
+<div class="eggtrack" id="eggTrack" aria-live="polite" title="">
+  <span class="eggtrack__label">آثار</span>
+  <span class="eggtrack__count" id="eggCount">0/5</span>
+</div>
+
+
+<!-- ==================================================================
+     INTRO OVERLAY — CH 00
+     ================================================================== -->
+<div class="intro" id="intro">
+  <div class="intro__sky" aria-hidden="true">
+    <div class="intro__sun"></div>
+    <div class="intro__horizon"></div>
+    <div class="intro__sea"></div>
+    <div class="intro__glow"></div>
+  </div>
+
+  <div class="intro__content">
+    <p class="intro__step intro__step--1">قبل ما تبدأي...</p>
+    <p class="intro__step intro__step--2">خدي وقتك.</p>
+    <button class="go" id="startBtn" type="button">
+      <span class="go__txt">ابدئي</span>
+      <span class="go__ripple"></span>
+    </button>
+    <p class="intro__step intro__step--3">في مكان هادي، لو تقدري.</p>
+  </div>
+</div>
+
+
+<!-- ==================================================================
+     THE JOURNEY
+     ================================================================== -->
+<main id="journey">
+
+
+<!-- ============== CH 01 — بداية صامتة ============== -->
+<section class="ch ch--opening" data-atm="dawn" data-title="البداية" id="ch-1">
+  <div class="ch__bg" data-par="0.2" aria-hidden="true">
+    <div class="ch1-glow"></div>
+  </div>
+
+  <div class="ch__inner">
+    <p class="line line--1" data-reveal="fade">في يوم من الأيام،</p>
+    <p class="line line--2" data-reveal="fade">من غير ما أخطط لحاجة،</p>
+    <p class="line line--3" data-reveal="fade">دخل حد حياتي.</p>
+  </div>
+</section>
+
+
+<!-- ============== CH 02 — الاسم ============== -->
+<section class="ch ch--name" data-atm="dawn" data-title="الاسم" id="ch-2">
+  <div class="ch__inner ch__inner--tall">
+    <p class="pre-name" data-reveal="fade">مش دخل بالكلام الكبير.</p>
+    <p class="pre-name" data-reveal="fade">دخل بهدوء، وقعد، وبقى جزء من يومي.</p>
+
+    <h1 class="the-name" aria-label="سما">
+      <span class="the-name__word" data-split="letters">سما</span>
+      <span class="the-name__underline" aria-hidden="true"></span>
+    </h1>
+
+    <p class="post-name" data-reveal="fade">ومن وقتها، حاجات كتير بقت مختلفة.</p>
+  </div>
+</section>
+
+
+<!-- ============== CH 03 — التاريخ ============== -->
+<section class="ch ch--date" data-atm="cream" data-title="21/01/2025" id="ch-3">
+  <div class="ch__inner ch__inner--tall">
+    <div class="date">
+      <span class="date__num date__num--a" data-reveal="rise">21</span>
+      <span class="date__sep" data-reveal="scale">/</span>
+      <span class="date__num date__num--b" data-reveal="rise">01</span>
+      <span class="date__sep" data-reveal="scale">/</span>
+      <span class="date__num date__num--c" data-reveal="rise">2025</span>
+    </div>
+
+    <p class="date__caption" data-reveal="fade">اليوم اللي بدأ فيه كل ده.</p>
+  </div>
+</section>
+
+
+<!-- ============== CH 04 — الـ3 لايكات ============== -->
+<section class="ch ch--likes" data-atm="cream" data-title="ثلاث لايكات" id="ch-4">
+  <div class="ch__inner">
+    <p class="lead-in" data-reveal="fade">لقيتك عاملة حاجة صغيرة جدًا...</p>
+
+    <div class="pulse-stage" id="pulseStage" aria-hidden="true">
+      <span class="pulse pulse--1"></span>
+      <span class="pulse pulse--2"></span>
+      <span class="pulse pulse--3"></span>
+      <span class="pulse-core"></span>
+    </div>
+
+    <p class="likes-word" data-reveal="fade">3 لايكات.</p>
+    <p class="likes-sub" data-reveal="fade">حاجة صغيرة في نظر أي حد. بس أنا وقفت عندها.</p>
+
+    <p class="question-mark" data-reveal="fade">وافتكرت إني سألتك سؤال مباشر شوية:</p>
+    <p class="question" data-reveal="fade">«هو ده معناه إنك معجبة بيا؟»</p>
+  </div>
+</section>
+
+
+<!-- ============== CH 05 — الكلام ============== -->
+<section class="ch ch--talk" data-atm="day" data-title="الكلام" id="ch-5">
+  <div class="talk-cloud" id="talkCloud" aria-hidden="false">
+    <span class="frag frag--1">تتكلمي</span>
+    <span class="frag frag--2">وبعدين</span>
+    <span class="frag frag--3">تضحكي</span>
+    <span class="frag frag--4">في نفس</span>
+    <span class="frag frag--5">اللحظة</span>
+    <span class="frag frag--6">واتكلمنا</span>
+    <span class="frag frag--7">كتير</span>
+    <span class="frag frag--8">أوي</span>
+    <span class="frag frag--9">واتعرفنا</span>
+    <span class="frag frag--10">على بعض</span>
+    <span class="frag frag--11">حاجة واحدة</span>
+    <span class="frag frag--12">ورا التانية</span>
+  </div>
+
+  <div class="talk-foot">
+    <p class="lead-in lead-in--bottom" data-reveal="fade">والكلام اللي بدأ بسيط... بقى جزء من اليوم.</p>
+  </div>
+</section>
+
+
+<!-- ============== CH 06 — الليل ============== -->
+<section class="ch ch--night" data-atm="twilight" data-title="بعد منتصف الليل" id="ch-6">
+  <div class="night-sky" aria-hidden="true">
+    <div class="night-sky__stars" id="nightStars"></div>
+    <div class="night-sky__moon" data-par="-0.15"></div>
+  </div>
+  <div class="night-sea" aria-hidden="true">
+    <div class="night-sea__glow"></div>
+    <div class="night-sea__lines"></div>
+  </div>
+
+  <button class="egg-star" id="eggStar" type="button" aria-label="نجمة"></button>
+
+  <div class="ch__inner ch__inner--tall">
+    <p class="kicker kicker--light" data-reveal="fade">الفصل اللي بحبه أكتر</p>
+
+    <h2 class="big-title big-title--light" data-reveal="lines">
+      <span>بعد</span>
+      <span>منتصف الليل</span>
+    </h2>
+
+    <div class="night-text">
+  <p data-reveal="fade" style="font-weight: 700;">أحلى حكاوينا مكانتش محتاجة وقت مناسب..</p>
+  <p data-reveal="fade" style="font-weight: 700;">كانت بتبدأ أول ما الدنيا تهدي، والساعة 12 تيجي، ويبقى الليل لينا إحنا بس (آه أهلك بيبقوا صاحيين بس عديها!).</p>
+  <p data-reveal="fade" style="font-weight: 700;">بنتكلم عن كل حاجة وأي حاجة.. بنضحك على التفاصيل، بنحكي اللي فات ويومنا اللي عدى.</p>
+  <p data-reveal="fade" style="font-weight: 700;">واللي بيدي طعم للكلام مش الكلام، لا ده إنتِ.. عشان بحكي معاكي يا سما، بحب أحكي معاكي.</p>
+  <p class="night-text__punch" data-reveal="fade" style="font-weight: 700;">ونلاقي في الآخر الساعة بقت 7 والوقت جري مننا.. وفعلاً الأوقات الحلوة بتخلص بسرعة.</p>
+</div>
+</section>
+
+
+<!-- ============== CH 07 — العدّاد ============== -->
+<section class="ch ch--counter" data-atm="day" data-title="العدّاد" id="ch-7">
+  <div class="ch__inner ch__inner--tall">
+    <p class="counter-label" data-reveal="fade">عدّى على بداية حكايتنا</p>
+
+    <button class="counter" id="dayCounter" type="button" aria-label="عدد الأيام">
+      <span class="counter__number" id="counterDays">0</span>
+      <span class="counter__word">يوم</span>
+      <span class="counter__since" id="counterSince">من 21 يناير 2025</span>
+    </button>
+
+    <div class="counter-detail" data-reveal="fade">
+      <div class="counter-detail__item">
+        <span class="counter-detail__num" id="detailHours">0</span>
+        <span class="counter-detail__lbl">ساعة</span>
+      </div>
+      <div class="counter-detail__item">
+        <span class="counter-detail__num" id="detailMinutes">0</span>
+        <span class="counter-detail__lbl">دقيقة</span>
+      </div>
+      <div class="counter-detail__item">
+        <span class="counter-detail__num" id="detailSeconds">0</span>
+        <span class="counter-detail__lbl">ثانية</span>
+      </div>
+    </div>
+
+    <p class="counter-note" data-reveal="fade">ومش مهم الرقم يوصل لكام، المهم إن كل الوقت ده كان جنبك.</p>
+  </div>
+</section>
+
+
+<!-- ============== CH 08 — تفاصيل ============== -->
+<section class="ch ch--details" data-atm="cream" data-title="تفاصيل" id="ch-8">
+  <div class="ch__inner">
+    <p class="kicker center" data-reveal="fade">تفاصيل صغيّرة بتفرق معايا</p>
+
+    <article class="detail detail--text" data-reveal="fade">
+      <h3>نبرة صوتك</h3>
+      <p>الهدوء اللي بحسه أول ما اسمع صوتك، وكأن الدنيا كلها بتهدى لمجرد إنك معايا</p>
+    </article>
+
+    <article class="detail detail--image" data-reveal="image">
+      <figure>
+        <img data-img="seaDay" alt="بحر في النهار" loading="lazy">
+        <figcaption>
+          <span class="detail__tag">هدوء البحر وصفائه</span>
+          <span class="detail__cap">البحر وهو صافي في عز النهار بيبقى شبهك بالضبط.. بيدي راحة، وبيخليك مطمن و انت جمبو</span>
+        </figcaption>
+      </figure>
+    </article>
+
+    <article class="detail detail--text detail--left" data-reveal="fade">
+      <h3>طريقتك</h3>
+      <p>إنك بتعرفي تقلب المود كله في ثانية بهزارك الحلو، وتكوني أكتر حد بيسمعني ويفهمني لما اتكلم بجد.</p>
+    </article>
+
+    <article class="detail detail--interactive" data-reveal="fade">
+      <button class="whisper-box" id="whisperBox" type="button">
+        <span class="whisper-box__hint">حاجة صغيرة</span>
+        <span class="whisper-box__face">
+          <span class="whisper-box__dot"></span>
+          <span class="whisper-box__dot"></span>
+          <span class="whisper-box__dot"></span>
+        </span>
+      </button>
+      <p class="whisper-box__reveal" id="whisperReveal" hidden>لحد ما نلاقي نفسنا بنتكلم بلغة محدش تاني يفهمها.</p>
+    </article>
+
+    <article class="detail detail--text detail--right" data-reveal="fade">
+      <h3>التفاصيل اللي بتفتكريها</h3>
+      <p>بتفتكري حاجة قلتها مرة واحدة، وبتسألي عنها بعد أسبوع. التفاصيل الصغيرة دي هي اللي بتخليكي مختلفة.</p>
+    </article>
+
+    <article class="detail detail--image" data-reveal="image">
+      <figure>
+        <img data-img="lilies" alt="زهور ليلي" loading="lazy">
+        <figcaption>
+          <span class="detail__tag">بحبك-ليليز</span>
+          <span class="detail__cap">اوصفها إنها زهرة هادية ورقيقة، مش محتاجة تعمل دوشة عشان تلفت النظر، جمالها هادي وبيخطف القلب علطول.. زيك بالظبط يا سما.زهرة بترمز للصفاء والجمال النقي، وهدوئها بيدي راحة نفسية لأي حد يشوفها.. وده بالظبط الإحساس اللي بيوصلي لما بحكي معاكي.</span>
+        </figcaption>
+      </figure>
+    </article>
+
+   
+</section>
+
+
+<!-- ============== CH 09 — الليلي ============== -->
+<section class="ch ch--lily" data-atm="cream" data-title="الليلي" id="ch-9">
+  <div class="lilygarden" id="lilyGarden" aria-hidden="true">
+    <span class="lily lily--deep"  data-par="0.06" data-x="8%"  data-y="18%"><svg><use href="#ic-lily"/></svg></span>
+    <span class="lily lily--deep"  data-par="0.08" data-x="78%" data-y="12%"><svg><use href="#ic-lily"/></svg></span>
+    <span class="lily lily--mid"   data-par="0.14" data-x="22%" data-y="62%"><svg><use href="#ic-lily"/></svg></span>
+    <span class="lily lily--mid"   data-par="0.18" data-x="62%" data-y="55%"><svg><use href="#ic-lily"/></svg></span>
+    <span class="lily lily--near"  data-par="0.26" data-x="14%" data-y="30%"><svg><use href="#ic-lily"/></svg></span>
+    <span class="lily lily--near"  data-par="0.3"  data-x="82%" data-y="72%"><svg><use href="#ic-lily"/></svg></span>
+
+    <button class="lily lily--near lily--egg" id="eggLily" type="button" aria-label="زهرة">
+      <svg><use href="#ic-lily"/></svg>
+    </button>
+  </div>
+
+  <div class="ch__inner ch__inner--tall center">
+    <p class="kicker" data-reveal="fade"></p>
+    <h2 class="big-title big-title--quiet" data-reveal="lines">
+      <span>هدوء الليل والنجوم</span>
+    </h2>
+    <p class="lily-line" data-reveal="fade"><b>نجمة هادية في أطراف السماء، مش بتعمل دوشة عشان تظهر.</b></p>
+<p class="lily-line lily-line--soft" data-reveal="fade"><b>وبرضه مستحيل تبص للفضاء من غير ما عينك تروح عليها وتخطفك.</b></p>
+<p class="lily-line lily-line--soft" data-reveal="fade"><b>اسم على مسمى، ونورها بيملى مكاني يا سما.</b></p>
+  </div>
+</section>
+
+
+<!-- ============== CH 10 — البحر ============== -->
+<section class="ch ch--sea" data-atm="day" data-title="البحر" id="ch-10">
+  <div class="ch__cover" data-par="0.18">
+    <img data-img="seaDay" alt="بحر في النهار" loading="lazy">
+    <div class="ch__cover-tint"></div>
+  </div>
+
+  <div class="ch__inner ch__inner--bottom">
+    <p class="sea-line" data-reveal="fade">عارفة إيه الغريب؟</p>
+    <p class="sea-line sea-line--soft" data-reveal="fade">إن في حاجات لما أشوفها بتفكرني بيكي.</p>
+    <p class="sea-line sea-line--whisper" data-reveal="fade">البحر واحد منها.</p>
+  </div>
+</section>
+
+
+<!-- ============== CH 11 — الغروب ============== -->
+<section class="ch ch--sunset" data-atm="sunset" data-title="الغروب" id="ch-11">
+  <div class="ch__cover" data-par="0.22">
+    <img data-img="sunset" alt="غروب" loading="lazy">
+    <div class="ch__cover-tint ch__cover-tint--warm"></div>
+  </div>
+
+  <div class="ch__inner ch__inner--center">
+    <h2 class="big-title big-title--light big-title--huge" data-reveal="lines">
+      <span>الغروب</span>
+    </h2>
+    <p class="sunset-line" data-reveal="fade">يمكن عشان كده بحب الغروب...</p>
+    <p class="sunset-line sunset-line--soft" data-reveal="fade">بيفكرني إن الأيام الحلوة لسة جاية بوجودك.</p>
+  </div>
+</section>
+<!-- ============== CH 12 — عالمك الخاصة ============== -->
+<section class="ch ch--world" data-atm="night" data-title="عالمك" id="ch-12">
+  <div class="ch__cover" data-par="0.20">
+    <img src="https://plus.unsplash.com/premium_photo-1664006988924-16f386bcd40e?w=700&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8Ym9va3xlbnwwfHwwfHx8MA%3D%3D" alt="شروق الشمس" loading="lazy">
+    <div class="ch__cover-tint ch__cover-tint--dark"></div>
+  </div>
+
+  <div class="ch__inner ch__inner--center">
+    <h2 class="big-title big-title--light big-title--huge" data-reveal="lines">
+      <span>عالمك الخاص</span>
+    </h2>
+    <p class="sunset-line" data-reveal="fade">الكتب و الرسم</p>
+    <p class="sunset-line sunset-line--soft" data-reveal="fade">لما بشوف كتاب أو رسمة هادية، بفتكرك على طول.. كأن أي فن أو جمال في الدنيا معمول عشان يفكرني بيكي.</p>
+  </div>
+</section>
+
+
+<!-- ============== CH 13 — الشروق ============== -->
+<section class="ch ch--sunrise" data-atm="sunrise" data-title="الشروق" id="ch-13">
+  <div class="ch__cover" data-par="0.18">
+<img src="https://plus.unsplash.com/premium_photo-1739739796004-0e0132daa87a?w=700&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8ZW1wdHklMjBzdHJlZXQlMjBhdCUyMG5pZ2h0fGVufDB8fDB8fHww" alt="شروق الشمس" loading="lazy">
+    <div class="ch__cover-tint ch__cover-tint--warm"></div>
+  </div>
+
+  <div class="ch__inner ch__inner--bottom">
+    <p class="sea-line" data-reveal="fade">الطريق الفاضي بالليل</p>
+    <p class="sea-line sea-line--soft" data-reveal="fade">الطريق الفاضي بالليل والمساحة اللي بتخليك تسرح وتفكر براحتك.. بيخليني أفتكر كل كلامنا واللحظات الحلوة اللي عشناها سوا.</p>
+  </div>
+</section>
+
+<!-- ============== CH 12 — حاجات صغيرة ============== -->
+<section class="ch ch--little" data-atm="twilight" data-title="حاجات صغيرة" id="ch-12">
+  <div class="ch__inner">
+    <p class="kicker center" data-reveal="fade">اللي بيعمل الفرق</p>
+    <h2 class="big-title big-title--small center" data-reveal="lines">
+      <span>حاجات</span>
+      <span>صغيرة</span>
+    </h2>
+
+    <div class="little-field" id="littleField">
+      <!-- JS builds items -->
+    </div>
+
+    <p class="little-foot" data-reveal="fade" style="color: black; "><b>مش المواقف الكبيرة اللي بتفضل في الذاكرة. الحاجات الصغيرة هي اللي بتعمل الحكاية.</b></p>
+  </div>
+</section>
+
+
+
+
+<!-- ============== CH 14 — لسه ما حصلش ============== -->
+<section class="ch ch--apart" data-atm="twilight" data-title="لسه" id="ch-14">
+  <div class="ch__inner ch__inner--tall">
+    <p class="kicker center" data-reveal="fade">فصل مختلف</p>
+    <h2 class="big-title big-title--small center" data-reveal="lines">
+      <span>لسه في حاجات</span>
+      <span>كتير ما حصلتش</span>
+    </h2>
+
+    <div class="apart-list">
+      <div class="apart-item" data-reveal="fade">
+        <span class="apart-item__num">01</span>
+        <div class="apart-item__txt">
+          <h3>أول مقابلة</h3>
+          <p style="font-weight: 700; color: #000000;">أول مرة نشوف بعض مش على شاشة. متخيل إن الكلام في اليوم ده هيكون قليل.</p>
+        </div>
+      </div>
+
+      <div class="apart-item" data-reveal="fade">
+        <span class="apart-item__num">02</span>
+        <div class="apart-item__txt">
+          <h3>أسوان</h3>
+          <p style="font-weight: 700; color: #000000;">إنتِ قولتي إنك ممكن تيجي أسوان. أنا مستني اليوم ده.</p>
+        </div>
+      </div>
+
+      <div class="apart-item" data-reveal="fade">
+        <span class="apart-item__num">03</span>
+        <div class="apart-item__txt">
+          <h3>أول يوم جامعة في المنيا</h3>
+          <p style="font-weight: 700; color: #000000;">عايز أكون هناك، من أول يوم، عشان أشوف بدايتك الجديدة.</p>
+        </div>
+      </div>
+
+      <div class="apart-item" data-reveal="fade">
+        <span class="apart-item__num">04</span>
+        <div class="apart-item__txt">
+          <h3>السفر</h3>
+          <p style="font-weight: 700; color: #000000;">أماكن كتير بنقول عليها. وهنروحها، واحدة واحدة.</p>
+        </div>
+      </div>
+
+      <div class="apart-item" data-reveal="fade">
+        <span class="apart-item__num">05</span>
+        <div class="apart-item__txt">
+          <h3>أيام طويلة سوا</h3>
+          <p style="font-weight: 700; color: #000000;">مش مجرد مكالمة. أيام كاملة، وفيها كل حاجة.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== CH 15 — المستقبل ============== -->
+<section class="ch ch--future" data-atm="night" data-title="المستقبل" id="ch-15">
+  <div class="future-sky" aria-hidden="true">
+    <div class="future-sky__stars" id="futureStars"></div>
+  </div>
+
+  <div class="ch__inner ch__inner--tall">
+    <p class="kicker kicker--light" data-reveal="fade">اللي جاي</p>
+    <h2 class="big-title big-title--light" data-reveal="lines">
+      <span>لسه في حاجات</span>
+      <span>كتير مستنيانا</span>
+    </h2>
+
+    <div class="future-lines">
+      <p class="f-line" data-reveal="fade">بيت هادي.</p>
+      <p class="f-line" data-reveal="fade">قهوة الصبح، وحكاوي بالليل.</p>
+      <p class="f-line" data-reveal="fade">خلافات صغيرة بنخلصها بضحكة.</p>
+      <p class="f-line" data-reveal="fade">ضوء بيبان من بعيد قبل ما نرجع.</p>
+      <p class="f-line f-line--accent" data-reveal="fade">واستقرار، يعني إحنا.</p>
+    </div>
+
+    <p class="future-names" data-reveal="fade">وفي يوم من الأيام، هنحكي لخالد وحمزة وليلي عن أول 3 لايكات.</p>
+  </div>
+</section>
+
+
+<!-- ============== CH 16 — الفترة الصعبة ============== -->
+<section class="ch ch--hard" data-atm="night" data-title="الفترة الصعبة" id="ch-16">
+  <div class="ch__inner ch__inner--narrow">
+    <p class="kicker kicker--light" data-reveal="fade">فصل تاني</p>
+    <h2 class="big-title big-title--light big-title--small" data-reveal="lines">
+      <span>وفي مرة،</span>
+      <span>الدنيا تقلت شوية.</span>
+    </h2>
+
+    <div class="hard-text">
+      <p data-reveal="fade">عرف أهلك، والدنيا وقفت.</p>
+      <p data-reveal="fade">أنا عارف إن اليومين دول كانوا تقيلين عليكي. وكنتي في موقف صعب.</p>
+      <p data-reveal="fade">وفي لحظة، حسيت إن الحكاية ممكن تخلص هنا.</p>
+      <p class="hard-punch" data-reveal="fade">بس إنتِ عديتي. واخترتي تكملي.</p>
+      <p class="hard-soft" data-reveal="fade">اليوم ده مش هنساه، لأنه قال لي إن اللي بينا مش هيكسره أول عاصفة.</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============== CH 17 — السر ============== -->
+<section class="ch ch--secret" data-atm="night" data-title="السر" id="ch-17">
+  <div class="secret-stars" aria-hidden="true" id="secretStars"></div>
+
+  <div class="ch__inner ch__inner--narrow center">
+    <p class="kicker kicker--light" data-reveal="fade">مقفولة</p>
+    <h2 class="big-title big-title--light big-title--small" data-reveal="lines">
+      <span>في حاجة</span>
+      <span>لسه مخبيها</span>
+    </h2>
+    <p class="secret-lead" data-reveal="fade">مكتوبة من زمان، ومستنية الكلمة الصح.</p>
+
+    <form class="pass" id="passForm" data-reveal="fade" novalidate>
+      <label class="pass__label" for="passInput">كلمة السر</label>
+      <div class="pass__row">
+        <input class="pass__input" id="passInput" type="text"
+               autocomplete="off" spellcheck="false" placeholder="اكتبيها هنا...">
+        <button class="go go--ghost" type="submit"><span class="go__txt">افتحي</span></button>
+      </div>
+      <p class="pass__msg" id="passMsg" role="status" aria-live="polite"></p>
+    </form>
+
+    <div class="letter" id="letter" hidden>
+      <div class="letter__inner">
+        <p class="letter__mark">الرسالة</p>
+        <div class="letter__body">
+          <p>لو وصلتي هنا، يبقى عرفتي الكلمة من أول مرة، وده مش مفاجئ ليا.</p>
+          <p>عايز أقولك حاجة بسيطة: إنتِ بقيتي جزء من يومي بشكل مش عارف أوصفه.</p>
+          <p>أول حاجة بفكر فيها لما أصحى، وآخر حاجة بفكر فيها قبل ما أنام.</p>
+          <p>أنا بحب الكلام معاكي. بحب إني أفتح التليفون وألاقي رسالة منك.</p>
+          <p>وبحب السهر معاكي. بحب إن الساعة تبقى 8 وإحنا لسه بنتكلم، وبحب إننا نضحك على حاجة محدش تاني هيفهمها.</p>
+         
+          <p class="letter__punch">وعايزك تعرفي إنك مش مجرد شخص بتكلمه. إنتِ شخص أنا بختاره كل يوم من جديد.</p>
+          <p>وباقي الكلام... هقولهولك في الحقيقة، أول ما نتقابل.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============== CH 18 — المشهد الأخير ============== -->
+<section class="ch ch--finalnight" data-atm="final" data-title="الليل الأخير" id="ch-18">
+  <div class="final-sky" aria-hidden="true">
+    <div class="final-sky__stars" id="finalStars"></div>
+    <div class="final-sky__moon" data-par="0.06"></div>
+  </div>
+  <div class="final-sea" aria-hidden="true">
+    <div class="final-sea__refl"></div>
+  </div>
+  <div class="final-fairy" id="finalFairy" aria-hidden="true"></div>
+
+  <!-- Easter Egg 5: tiny hidden dot in the scene -->
+  <button class="egg-drift" id="eggDrift" type="button" aria-label="ضوء صغير"></button>
+
+  <div class="ch__inner ch__inner--tall center">
+    <p class="kicker kicker--light" data-reveal="fade">قبل النهاية</p>
+
+    <div class="final-lily" aria-hidden="true">
+      <svg><use href="#ic-lily"/></svg>
+    </div>
+
+    <p class="final-line" data-reveal="lines">
+      <span>سما</span>
+      <span>عايز اقولك</span>
+    </p>
+  </div>
+</section>
+
+
+<!-- ============== CH 19 — الرسالة الأخيرة ============== -->
+<section class="ch ch--lastletter" data-atm="final" data-title="الرسالة" id="ch-19">
+  <div class="ch__inner ch__inner--narrow">
+    <h2 class="big-title big-title--light big-title--small" data-reveal="lines">
+      <span>شكرًا</span>
+    </h2>
+
+    <div class="last-letter">
+      <p data-reveal="fade">شكرًا يا سما.</p>
+      <p data-reveal="fade">شكرًا إنك موجودة. مش عارف أكتب الجملة دي من غير ما أحس إنها أقل من اللي أنا عايز أقوله، بس هحاول.</p>
+      <p data-reveal="fade">شكرًا على كل يوم اتكلمنا فيه. حتى الأيام اللي كان الكلام فيها قليل، كانت بتفرق معايا.</p>
+      <p data-reveal="fade">شكرًا على كل مرة ضحكنا فيها. الضحك معاكي مختلف، لأنه بييجي من غير سبب واضح، وبيفضل معايا بعد ما نسكت.</p>
+      <p data-reveal="fade">شكرًا على كل مرة سهرنا فيها. على الحكاوي اللي بعد 12، وعلى إنك كنتي بتفضلي معايا وإنتِ المفروض تكوني نمتي من زمان.</p>
+      <p data-reveal="fade">شكرًا على كل فيلم شفناه سوا وإحنا بعيد. على المشاهد اللي بتحكيها لي، وعلى إنك بتخليكي جزء من كل حاجة بحبها.</p>
+      <p data-reveal="fade">شكرًا على التفاصيل الصغيرة. على إنك بتفتكري حاجة قلتها مرة، وعلى إنك بتسألي عن يومي قبل ما أحكيه.</p>
+      <p data-reveal="fade">شكرًا على كل مرة صبرتي عليّا. أنا عارف إن مش سهل تتعامل مع حد بعيد، بس إنتِ كنتي بتختاري تكملي.</p>
+      <p data-reveal="fade">وشكرًا على الفترة الصعبة. لما أهلك عرفوا. أنا عارف إن الوقت ده كان تقيل عليكي، وأصعب عليكي مني. إنك عديتي منه ولسه بتكملي معايا... ده حاجة مش هنساهالك.</p>
+      <p data-reveal="fade">شكرًا لأنك مكنتيش بس كلام. إنتِ بتحاولي، وبتدوري على حل، وبتفضلي.</p>
+      <p data-reveal="fade">شكرًا على إنك بتخليني أحب أكون أحسن. مش لأنك بتطلبيني أكون أحسن، لكن لأني أنا نفسي بحب أكون أحسن عشانك.</p>
+      <p data-reveal="fade">وشكرًا على إنك بتسمحيلي أكون نفسي. بهزاري، وبطريقتي في الكلام، وبكل حاجة أنا فيها.</p>
+      <p data-reveal="fade">وعارف إننا لسه متقابلناش. وعارف إن ده بيسيب فراغ في وسط الحكاية. بس الفراغ ده مش معناه إن اللي بينا مش حقيقي.</p>
+      <p data-reveal="fade">كل يوم اتكلمنا فيه حقيقي. كل مرة ضحكنا حقيقي. كل مرة قلتلك حاجة وخففتي عليّا حقيقي.</p>
+      <p data-reveal="fade">وبعدين... لسه في حاجات كتير. لسه في أول لقاء، وأسوان، والمنيا. لسه في سفر، وبيت، واستقرار، وحياة عادية جدًا بحبها.</p>
+      <p data-reveal="fade">ولسه في يوم من الأيام هنحكي لخالد وحمزة وليلي عن كل الي عيشناه و هنعيشو سوا، </p>
+      <p class="last-letter__end" data-reveal="fade">شكرًا يا سما، على كل حاجة. وعلى كل حاجة لسه جاية.</p>
+    </div>
+
+    <p class="last-letter__sign" data-reveal="fade">— من الشخص اللي بيحبك و هيفضل يحبك مهما حصل</p>
+
+    <button class="go go--ghost go--center" id="backTop" type="button">
+      <span class="go__txt">ارجعي من الأول</span>
+    </button>
+  </div>
+</section>
+
+
+</main>
+
+
+<!-- ============ Small modal ============ -->
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle" hidden>
+  <div class="modal__bd" data-close></div>
+  <div class="modal__card">
+    <p class="modal__lbl" id="mLabel">همسة</p>
+    <h3 class="modal__ttl" id="mTitle"></h3>
+    <p class="modal__txt" id="mText"></p>
+    <button class="go go--ghost" type="button" data-close><span class="go__txt">تمام</span></button>
+  </div>
+</div>
+
+
+<!-- ============ Unlock modal (when all 5 eggs found) ============ -->
+<div class="unlock" id="unlock" role="dialog" aria-modal="true" aria-labelledby="uTitle" hidden>
+  <div class="unlock__bd"></div>
+  <div class="unlock__inner">
+    <div class="unlock__stars" id="unlockStars" aria-hidden="true"></div>
+    <p class="unlock__lbl">خلصتِ الرحلة</p>
+    <h2 class="unlock__ttl" id="uTitle">لقيتي كل الحاجات المخبية</h2>
+    <p class="unlock__txt">لو وصلتي لحد هنا وإنتِ لسه بتدوري على تفاصيل صغيرة، يبقى عارفة إني عملت الموقع ده لمين.</p>
+    <p class="unlock__txt">الخمسة اللي لقيتيهم مكانوش حشو. كل واحدة كانت جملة كنت عايز أقولها، بس حبيت تكون مكافأة لحد بينتبه.</p>
+    <button class="go" id="unlockClose" type="button"><span class="go__txt">كملّي</span></button>
+  </div>
+</div>
+
+
+<script src="script.js"></script>
+</body>
+</html>
